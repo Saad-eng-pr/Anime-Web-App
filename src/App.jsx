@@ -17,11 +17,13 @@ const API_OPTIONS = {
 }
 
 const App = () => {
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [searchTerm, setSearchTerm] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+
   const [movieList, setMovieList] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
   const [trendingMovies, setTrendingMovies] = useState([]);
 
   // debouncing permet d'optimiser le nombre de requêtes envoyées au serveur en attendant que l'utilisateur arrête de taper pendant 0.5s
@@ -30,6 +32,7 @@ const App = () => {
   const fetchMovies = async (query = '') => {
     setIsLoading(true);
     setErrorMessage('');
+    
     try{
       const endpoint = query ? 
         `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
