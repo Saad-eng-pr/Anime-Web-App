@@ -2,6 +2,7 @@ import React, { useState, useEffect, use } from 'react';
 import './App.css';
 import Search from './components/Search.jsx';
 import Spinner from './components/Spinner.jsx';
+import MovieCard from './components/MovieCard.jsx';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -21,10 +22,12 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchMovies = async () => {
+  const fetchMovies = async ({query = ''}) => {
     setIsLoading(false);
     try{
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query ? 
+        `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+        :`${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
@@ -50,13 +53,13 @@ const App = () => {
   }
 
   useEffect(( ) => {
-    fetchMovies();
-  }, []);
+    fetchMovies(searchTerm);
+  }, [searchTerm]);
   return (
     <main>
-      <div className="pattern" />
+      <div className="pattern"/>
 
-      <div className = "wrapper">
+      <div className="wrapper">
         <header>
           <img src="./hero.png" alt="Hero Banner" />
           <h1>Find The <span className="text-gradient">Movies</span> You I'll Like Whithout a Hastle</h1>
@@ -75,7 +78,7 @@ const App = () => {
           ) : (
             <ul>
               {movieList.map((movie) => (
-                <p key={movie.id} className='text-white'>{movie.title}</p>
+                <MovieCard key={movie.id} movie={movie} />
               ))}
             </ul>
           )}
