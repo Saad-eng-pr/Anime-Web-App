@@ -1,8 +1,10 @@
 import React, { useState, useEffect, use } from 'react';
+import {useDebounce} from 'react-use';
 import './App.css';
 import Search from './components/Search.jsx';
 import Spinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx';
+import { updateSearchCount } from './appwrite.js';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -21,9 +23,14 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  
+  // debouncing permet d'optimiser le nombre de requêtes envoyées au serveur en attendant que l'utilisateur arrête de taper pendant 0.5s
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm])
 
-  const fetchMovies = async ({query = ''}) => {
-    setIsLoading(false);
+  const fetchMovies = async (query = '') => {
+    setIsLoading(true);
+    setErrorMessage('');
     try{
       const endpoint = query ? 
         `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
@@ -44,6 +51,10 @@ const App = () => {
       }
 
       setMovieList(data.results || []);
+
+      if(query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage('Error fetching movies. Please try later. 1');
@@ -53,8 +64,8 @@ const App = () => {
   }
 
   useEffect(( ) => {
-    fetchMovies(searchTerm);
-  }, [searchTerm]);
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
   return (
     <main>
       <div className="pattern"/>
@@ -65,7 +76,6 @@ const App = () => {
           <h1>Find The <span className="text-gradient">Movies</span> You I'll Like Whithout a Hastle</h1>
           
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
-          <h1 className="text-white">{searchTerm}</h1>
         </header>
 
         <section className='all-movies'>
