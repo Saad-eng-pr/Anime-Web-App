@@ -23,6 +23,10 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+  
   body {
     font-family: "DM Sans", serif;
     font-optical-sizing: auto;
